@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "wissenswiki-django"
+version = "0.1.0"
+description = "Wissensblöcke, typisierte Beziehungen und Wissensnetz als Django-App"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "Django>=6.0",
+    "wissenswiki-core>=0.1",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=8", "pytest-django>=4.9"]
+
+[tool.setuptools.packages.find]
+include = ["wissenswiki*"]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "tests.settings"
+testpaths = ["tests"]
