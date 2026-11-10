@@ -4,11 +4,13 @@ from __future__ import annotations
 
 from urllib.parse import quote
 
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.middleware.csrf import get_token
 from django.shortcuts import redirect
 from django.templatetags.static import static
+from django.template.loader import render_to_string
 from django.urls import reverse
 from django.views.decorators.http import require_http_methods
 
@@ -31,8 +33,11 @@ def page(request: HttpRequest, page: str) -> HttpResponse:
             return redirect("wissenswiki:graph")
         if not request.GET.get("domain"):
             return redirect(request.path + "?domain=" + quote(next(iter(current.domains)), safe=""))
+    template = getattr(settings, "WISSENSWIKI_NAVIGATION_TEMPLATE", "")
+    navigation = render_to_string(template, request=request) if template else ""
     html = render_page(page, urls=_urls(), token=get_token(request), path=request.path,
-                       workspace_enabled=current.workspace is not None, domains=current.domains)
+                       workspace_enabled=current.workspace is not None, domains=current.domains,
+                       app_navigation=navigation)
     return HttpResponse(html)
 
 

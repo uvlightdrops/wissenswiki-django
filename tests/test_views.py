@@ -4,6 +4,7 @@ import pytest
 from django.contrib.auth.models import User
 from django.core.checks import run_checks
 from django.test import Client
+from django.template import TemplateDoesNotExist
 
 pytestmark = pytest.mark.django_db
 
@@ -103,3 +104,38 @@ def test_static_assets_come_from_core_app(settings):
     assert finders.find("wissenswiki/graph.js")
     settings.INSTALLED_APPS = [app for app in settings.INSTALLED_APPS if app != "wissenswiki_core"]
     assert [m for m in run_checks() if m.id == "wissenswiki.E002"]
+
+
+@pytest.fixture
+def navigation_templates(settings):
+    settings.TEMPLATES = [{
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "OPTIONS": {
+            "loaders": [("django.template.loaders.locmem.Loader", {
+                "host-navigation.html": '<nav id="host-menu">{{ user.username }} · {{ request.GET.label }}</nav>',
+            })],
+            "context_processors": [
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+            ],
+        },
+    }]
+    settings.WISSENSWIKI_NAVIGATION_TEMPLATE = "host-navigation.html"
+
+
+@pytest.mark.parametrize("url", ["/wiki/", "/wiki/graph/", "/wiki/graph-header/", "/wiki/settings/"])
+def test_host_navigation_receives_request_and_context_processors(wiki, navigation_templates, url):
+    response = _client().get(url, {"label": "<script>unsafe</script>"})
+
+    assert response.status_code == 200
+    html = response.content.decode()
+    assert html.count('id="host-menu"') == 1
+    assert "anna · &lt;script&gt;unsafe&lt;/script&gt;" in html
+    assert "<script>unsafe</script>" not in html
+
+
+def test_missing_host_navigation_template_is_reported(wiki, navigation_templates, settings):
+    settings.WISSENSWIKI_NAVIGATION_TEMPLATE = "missing-navigation.html"
+
+    with pytest.raises(TemplateDoesNotExist):
+        _client().get("/wiki/")

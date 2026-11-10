@@ -2,8 +2,8 @@
 project: wissenswiki-django
 scope: Überblick, Einbindung und Tests der Wiki-App
 created: null
-updated: "2026-11-09 11"
-update_reason: Kern und Oberfläche nach wissenswiki-core ausgelagert
+updated: "2026-11-10 15"
+update_reason: Optionales Navigationstemplate des Hostprojekts beschrieben
 status: active
 agent_project: ki-knowledge
 ---
@@ -38,6 +38,14 @@ path("wiki/", include("wissenswiki.urls"))
 ```
 
 Seiten: `wiki/` (Arbeitsraum), `wiki/graph/`, `wiki/graph-header/`, `wiki/settings/`.
+
+Optional kann der Host `WISSENSWIKI_NAVIGATION_TEMPLATE = "navigation.html"`
+setzen. Dieses Django-Template wird mit dem aktuellen Request und den
+konfigurierten Context Processors gerendert und am Anfang jeder Wiki-Seite
+eingebunden. Es darf vertrauenswürdiges Host-Markup und eigene CSS-/JS-Links
+enthalten, aber keine ungeprüften Nutzereingaben. Ohne diese Einstellung
+bleibt die Oberfläche unverändert; ein fehlendes Template wird als Fehler
+gemeldet.
 
 ## Tests [tests]
 
