@@ -37,7 +37,7 @@ def page(request: HttpRequest, page: str) -> HttpResponse:
     navigation = render_to_string(template, request=request) if template else ""
     html = render_page(page, urls=_urls(), token=get_token(request), path=request.path,
                        workspace_enabled=current.workspace is not None, domains=current.domains,
-                       app_navigation=navigation)
+                       app_navigation=navigation, relation_catalog=current.relation_catalog)
     return HttpResponse(html)
 
 

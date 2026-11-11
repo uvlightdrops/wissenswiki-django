@@ -2,8 +2,8 @@
 project: wissenswiki-django
 scope: Überblick, Einbindung und Tests der Wiki-App
 created: null
-updated: "2026-11-10 15"
-update_reason: Optionales Navigationstemplate des Hostprojekts beschrieben
+updated: "2026-11-11 19"
+update_reason: Gemeinsamen Betreiberkatalog für Renderer und API beschrieben
 status: active
 agent_project: ki-knowledge
 ---
@@ -24,6 +24,15 @@ Diese App ergänzt nur Login, CSRF, URL-Routing und die Konfiguration über die 
 
 ## Einbindung [integration]
 
+```yaml block-meta
+updated: "2026-11-11 19"
+status: active
+relations:
+  - target: ../wissenswiki-core/README.md#relation-catalog
+    type: depends-on
+    reason: Gemeinsames Katalogschema, Definitionen und API-Vertrag des Core
+```
+
 ```python
 INSTALLED_APPS += ["wissenswiki_core", "wissenswiki"]   # Core liefert CSS/JS
 WISSENSWIKI = {
@@ -32,12 +41,21 @@ WISSENSWIKI = {
                  "relations": "~/dev_wiki_rel"}],   # optional; nur lesend
     "MARKDOWN_DATA": {"root": "~/dev_data/ki-knowledge",
                       "relations": "~/dev_wiki_rel_ki", "prefix": "ki:"},  # optional
+    "RELATION_CATALOG": {"preset": "documentation", "types": []},  # optional
 }
 # urls.py
 path("wiki/", include("wissenswiki.urls"))
 ```
 
 Seiten: `wiki/` (Arbeitsraum), `wiki/graph/`, `wiki/graph-header/`, `wiki/settings/`.
+
+Der [Beziehungskatalog des Core](../wissenswiki-core/README.md#relation-catalog)
+gilt unverändert in Django: `basic`, `documentation` (Standard), `knowledge`
+und eigene Typen. Seiten erhalten den aktuellen Katalog; GET `wiki/api`
+liefert `relation_types` mit `key`, `label`, `description`, `color`, `enabled`.
+Arbeitsraum- und Netz-Schreibaktionen validieren dieselben aktivierten Typen.
+Ungültige Konfiguration wird als `ImproperlyConfigured` beziehungsweise
+Systemprüfung `wissenswiki.E001` gemeldet; deaktivierte bestehende Kanten bleiben lesbar.
 
 Optional kann der Host `WISSENSWIKI_NAVIGATION_TEMPLATE = "navigation.html"`
 setzen. Dieses Django-Template wird mit dem aktuellen Request und den
